@@ -20,6 +20,8 @@ import org.openide.util.Lookup;
 public interface NativeSpi extends Lookup.Provider {
 
   int lguVersion();
+  
+  String lguErrorText(int errorCode);
 
   @Override
   public default Lookup getLookup()

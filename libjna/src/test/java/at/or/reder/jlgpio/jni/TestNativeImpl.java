@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class TestNativeImpl {
 
@@ -29,7 +31,6 @@ public class TestNativeImpl {
   {
     impl = new JniNativeImpl();
     assertThat(impl).isNotNull();
-    System.err.println("Native library can be loaded");
   }
 
   @Test
@@ -38,5 +39,13 @@ public class TestNativeImpl {
   {
     int expected = 0x20200;
     assertThat(impl.lguVersion()).isEqualTo(expected);
+  }
+
+  @ParameterizedTest
+  @CsvSource({"-1,initialisation failed",
+              "-105,can not set a group to alert"})
+  void testGetErrorText(int errorCode, String expected)
+  {
+    assertThat(impl.lguErrorText(errorCode)).isEqualTo(expected);
   }
 }

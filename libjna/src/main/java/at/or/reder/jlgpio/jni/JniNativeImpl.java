@@ -57,4 +57,12 @@ public class JniNativeImpl implements Library, NativeSpi {
     return _lguVersion();
   }
 
+  private static native String _lguErrorText(int errorCode);
+
+  @Override
+  public String lguErrorText(int errorCode)
+  {
+    return _lguErrorText(errorCode);
+  }
+
 }
