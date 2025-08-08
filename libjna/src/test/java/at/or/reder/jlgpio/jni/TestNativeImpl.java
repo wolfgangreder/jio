@@ -43,6 +43,7 @@ public class TestNativeImpl {
 
   @ParameterizedTest
   @CsvSource({"-1,initialisation failed",
+              "-50,blödertext",
               "-105,can not set a group to alert"})
   void testGetErrorText(int errorCode, String expected)
   {
