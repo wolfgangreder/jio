@@ -1,3 +1,5 @@
+package at.or.reder.jlgpio;
+
 /*
  * Copyright 2025 Wolfgang Reder.
  *
@@ -13,31 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.jlgpio.spi;
 
-import java.nio.ByteBuffer;
-import org.openide.util.Lookup;
 
-public interface NativeSpi extends Lookup.Provider {
-
-  int lgGpiochipOpen(int gpioDev);
-
-  int lgGpiochipClose(int handle);
-  
-  int lgGpioGetChipInfo(int handle, ByteBuffer chipInfo);
-  
-  int lguVersion();
-
-  String lguErrorText(int errorCode);
-
-  void lguSetWorkDir(String workingDir);
-
-  String lugGetWorkDir();
-
-  @Override
-  public default Lookup getLookup()
-  {
-    return Lookup.EMPTY;
-  }
+public record LgChipInfo(int numLines, String name, String label) {
 
 }

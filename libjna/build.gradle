@@ -22,13 +22,14 @@ dependencies {
 
     implementation libs.jna.module
     implementation libs.jna.platform
+    implementation libs.lombok
   
     testImplementation libs.junit.jupiter
     testImplementation libs.junit.platform
     testImplementation libs.assertj.core
 
     annotationProcessor libs.org.netbeans.api.org.openide.util
-
+    annotationProcessor libs.lombok
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

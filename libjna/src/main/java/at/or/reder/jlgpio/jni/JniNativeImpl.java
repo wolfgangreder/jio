@@ -20,8 +20,11 @@ import com.sun.jna.FunctionMapper;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.Structure;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Map;
+import lombok.NonNull;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = NativeSpi.class)
@@ -36,8 +39,8 @@ public class JniNativeImpl implements Library, NativeSpi {
     NativeLibrary nativeLib = NativeLibrary.getInstance("lgpio",
                                                         Map.of(Library.OPTION_FUNCTION_MAPPER,
                                                                (FunctionMapper) JniNativeImpl::functionMapper,
-                                                               Library.OPTION_CLASSLOADER, JniNativeImpl.class.
-                                                                       getClassLoader()));
+                                                               Library.OPTION_CLASSLOADER,
+                                                               JniNativeImpl.class.getClassLoader()));
     Native.register(nativeLib);
   }
 
@@ -47,6 +50,30 @@ public class JniNativeImpl implements Library, NativeSpi {
       return method.getName().substring(1);
     }
     return method.getName();
+  }
+
+  private static native int _lgGpiochipOpen(int gpioDev);
+
+  @Override
+  public int lgGpiochipOpen(int gpioDev)
+  {
+    return _lgGpiochipOpen(gpioDev);
+  }
+
+  public static native int _lgGpiochipClose(int handle);
+
+  @Override
+  public int lgGpiochipClose(int handle)
+  {
+    return _lgGpiochipClose(handle);
+  }
+
+  public static native int _lgGpioGetChipInfo(int handle, Structure struture);
+
+  @Override
+  public int lgGpioGetChipInfo(int handle, ByteBuffer chipInfo)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
   }
 
   private static native int _lguVersion();
@@ -63,6 +90,22 @@ public class JniNativeImpl implements Library, NativeSpi {
   public String lguErrorText(int errorCode)
   {
     return _lguErrorText(errorCode);
+  }
+
+  private static native void _lguSetWorkDir(String workingDir);
+
+  @Override
+  public void lguSetWorkDir(@NonNull String workingDir)
+  {
+    _lguSetWorkDir(workingDir);
+  }
+
+  private static native String _lguGetWorkDir();
+
+  @Override
+  public String lugGetWorkDir()
+  {
+    return _lguGetWorkDir();
   }
 
 }
