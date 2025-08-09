@@ -28,6 +28,8 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 
 @Messages({
+  "# {0} - errorMessage",
+  "Main_err_parseCmdLine=Cannot parse command line: {0}",
   "Main_enum_chips_descr=Enumerate available chips"
 })
 public class Main {
@@ -61,6 +63,7 @@ public class Main {
       CommandLine cmd = parser.parse(OPTIONS, args);
       new Main().run(cmd);
     } catch (ParseException ex) {
+      System.err.println(Bundle.Main_err_parseCmdLine(ex.getLocalizedMessage()));
       Exceptions.printStackTrace(ex);
       printHelp();
     }

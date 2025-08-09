@@ -8,6 +8,7 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
+    id 'maven-publish'
 }
 
 repositories {
@@ -29,12 +30,30 @@ dependencies {
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
+  withJavadocJar()
+  withSourcesJar()
 }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      //      groupId = $group
+      //artifactId = "dcccontrol-$moduleArtifact"
+      //      version = $version
+
+      from components.java
+    }
+  }
+}
+
+javadoc {
+  failOnError = false
 }
