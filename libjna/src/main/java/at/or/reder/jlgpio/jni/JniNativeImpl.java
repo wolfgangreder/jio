@@ -15,6 +15,8 @@
  */
 package at.or.reder.jlgpio.jni;
 
+import at.or.reder.jlgpio.LgChipInfo;
+import at.or.reder.jlgpio.LgException;
 import at.or.reder.jlgpio.spi.NativeSpi;
 import com.sun.jna.FunctionMapper;
 import com.sun.jna.Library;
@@ -22,13 +24,15 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Structure;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import lombok.NonNull;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = NativeSpi.class)
 public class JniNativeImpl implements Library, NativeSpi {
+
+  public static final int LG_GPIO_NAME_LEN = 32;
+  public static final int LG_GPIO_LABEL_LEN = 32;
 
   static {
     initialize();
@@ -54,26 +58,37 @@ public class JniNativeImpl implements Library, NativeSpi {
 
   private static native int _lgGpiochipOpen(int gpioDev);
 
-  @Override
-  public int lgGpiochipOpen(int gpioDev)
+  private int checkLgResult(int resultCode) throws LgException
   {
-    return _lgGpiochipOpen(gpioDev);
+    if (resultCode < 0) {
+      String message = lguErrorText(resultCode);
+      throw new LgException(resultCode, message);
+    }
+    return resultCode;
+  }
+
+  @Override
+  public int lgGpiochipOpen(int gpioDev) throws LgException
+  {
+    return checkLgResult(_lgGpiochipOpen(gpioDev));
   }
 
   public static native int _lgGpiochipClose(int handle);
 
   @Override
-  public int lgGpiochipClose(int handle)
+  public void lgGpiochipClose(int handle) throws LgException
   {
-    return _lgGpiochipClose(handle);
+    checkLgResult(_lgGpiochipClose(handle));
   }
 
   public static native int _lgGpioGetChipInfo(int handle, Structure struture);
 
   @Override
-  public int lgGpioGetChipInfo(int handle, ByteBuffer chipInfo)
+  public LgChipInfo lgGpioGetChipInfo(int handle) throws LgException
   {
-    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    NativeChipInfo nativeInfo = new NativeChipInfo();
+    checkLgResult(_lgGpioGetChipInfo(handle, nativeInfo));
+    return new LgChipInfo(nativeInfo.getNumLines(), nativeInfo.getName(), nativeInfo.getLabel());
   }
 
   private static native int _lguVersion();

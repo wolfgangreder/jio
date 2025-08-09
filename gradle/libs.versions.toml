@@ -8,6 +8,7 @@ junit-platform = "1.13.4"
 junit-jupiter = "5.13.4"
 assertj = "3.27.3"
 lombok = "1.18.38"
+commons-cli = "1.10.0"
 
 
 [libraries]
@@ -19,3 +20,4 @@ junit-platform = { module = "org.junit.platform:junit-platform-launcher", versio
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+commons-cli = { module = "commons-cli:commons-cli", version.ref = "commons-cli" }

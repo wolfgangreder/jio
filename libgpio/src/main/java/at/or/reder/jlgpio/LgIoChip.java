@@ -13,32 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.jlgpio.spi;
+package at.or.reder.jlgpio;
 
-import at.or.reder.jlgpio.LgChipInfo;
-import at.or.reder.jlgpio.LgException;
-import org.openide.util.Lookup;
+import java.io.IOException;
 
-public interface NativeSpi extends Lookup.Provider {
+public interface LgIoChip extends AutoCloseable {
 
-  int lgGpiochipOpen(int gpioDev) throws LgException;
+  LgChipInfo getChipInfo() throws IOException;
 
-  void lgGpiochipClose(int handle) throws LgException;
-
-  LgChipInfo lgGpioGetChipInfo(int handle) throws LgException;
-
-  int lguVersion();
-
-  String lguErrorText(int errorCode);
-
-  void lguSetWorkDir(String workingDir) throws LgException;
-
-  String lugGetWorkDir();
-
+//  Stream<LgLineInfo> enumerateLines() throws IOException;
   @Override
-  public default Lookup getLookup()
-  {
-    return Lookup.EMPTY;
-  }
+  void close() throws IOException;
 
 }

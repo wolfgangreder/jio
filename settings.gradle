@@ -13,3 +13,4 @@ plugins {
 rootProject.name = 'jlgpio'
 include('libgpio')
 include('libjna')
+include('jlgpio')

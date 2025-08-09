@@ -13,32 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.jlgpio.spi;
+package at.or.reder.jlgpio.jni;
 
-import at.or.reder.jlgpio.LgChipInfo;
-import at.or.reder.jlgpio.LgException;
-import org.openide.util.Lookup;
+import com.sun.jna.Structure;
 
-public interface NativeSpi extends Lookup.Provider {
+@SuppressWarnings("FieldMayBeFinal")
+public class NativeChipInfo extends Structure implements Structure.ByReference {
 
-  int lgGpiochipOpen(int gpioDev) throws LgException;
+  private int numLines;
+  private char[] name;
+  private char[] label;
 
-  void lgGpiochipClose(int handle) throws LgException;
-
-  LgChipInfo lgGpioGetChipInfo(int handle) throws LgException;
-
-  int lguVersion();
-
-  String lguErrorText(int errorCode);
-
-  void lguSetWorkDir(String workingDir) throws LgException;
-
-  String lugGetWorkDir();
-
-  @Override
-  public default Lookup getLookup()
+  public NativeChipInfo()
   {
-    return Lookup.EMPTY;
+    numLines = 0;
+    name = new char[JniNativeImpl.LG_GPIO_NAME_LEN];
+    label = new char[JniNativeImpl.LG_GPIO_LABEL_LEN];
   }
 
+  public int getNumLines()
+  {
+    return numLines;
+  }
+
+  public String getName()
+  {
+    return NativeUtils.ntsToString(name);
+  }
+
+  public String getLabel()
+  {
+    return NativeUtils.ntsToString(label);
+  }
 }
