@@ -16,19 +16,21 @@
 package at.or.reder.jlgpio.jni;
 
 import com.sun.jna.Structure;
+import com.sun.jna.Structure.FieldOrder;
 
 @SuppressWarnings("FieldMayBeFinal")
+@FieldOrder({"numLines", "name", "label"})
 public class NativeChipInfo extends Structure implements Structure.ByReference {
 
-  private int numLines;
-  private char[] name;
-  private char[] label;
+  public int numLines;
+  public byte[] name;
+  public byte[] label;
 
   public NativeChipInfo()
   {
     numLines = 0;
-    name = new char[JniNativeImpl.LG_GPIO_NAME_LEN];
-    label = new char[JniNativeImpl.LG_GPIO_LABEL_LEN];
+    name = new byte[JniNativeImpl.LG_GPIO_NAME_LEN];
+    label = new byte[JniNativeImpl.LG_GPIO_LABEL_LEN];
   }
 
   public int getNumLines()
@@ -45,4 +47,5 @@ public class NativeChipInfo extends Structure implements Structure.ByReference {
   {
     return NativeUtils.ntsToString(label);
   }
+
 }

@@ -19,6 +19,8 @@ import java.io.IOException;
 
 public interface LgIoChip extends AutoCloseable {
 
+  LgChipId getId();
+
   LgChipInfo getChipInfo() throws IOException;
 
 //  Stream<LgLineInfo> enumerateLines() throws IOException;

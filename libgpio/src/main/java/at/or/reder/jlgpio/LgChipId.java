@@ -19,10 +19,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.Value;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.openide.util.NbBundle.Messages;
 
-@Value
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@RequiredArgsConstructor
 @Messages({
   "# {0} - deviceName",
   "LgChipId_err_not_parsable=Cannot parse device name \"{0}\""
@@ -30,7 +34,8 @@ import org.openide.util.NbBundle.Messages;
 public final class LgChipId {
 
   private static final Pattern PAT_GPIO = Pattern.compile("/dev/gpiochip(\\d+)");
-  private final long deviceNum;
+  @EqualsAndHashCode.Include
+  private final int deviceNum;
 
   public static Matcher matchDeviceName(String deviceName)
   {
@@ -41,7 +46,7 @@ public final class LgChipId {
   {
     Matcher matcher = matchDeviceName(deviceName);
     if (matcher.matches() && matcher.groupCount() > 0) {
-      deviceNum = Long.parseLong(matcher.group(1));
+      deviceNum = Integer.parseInt(matcher.group(1));
     } else {
       throw new IllegalArgumentException(Bundle.LgChipId_err_not_parsable(deviceName));
     }

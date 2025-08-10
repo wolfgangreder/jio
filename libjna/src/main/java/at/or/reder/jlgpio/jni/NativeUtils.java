@@ -15,22 +15,23 @@
  */
 package at.or.reder.jlgpio.jni;
 
+import java.nio.charset.StandardCharsets;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class NativeUtils {
-  
-  static String ntsToString(char[] charArray)
+
+  static String ntsToString(byte[] byteArray)
   {
-    if (charArray != null) {
-      if (charArray.length == 0) {
+    if (byteArray != null) {
+      if (byteArray.length == 0) {
         return "";
       }
       int lastIndex = 0;
-      while (lastIndex < charArray.length && charArray[lastIndex] != 0) {
+      while (lastIndex < byteArray.length && byteArray[lastIndex] != 0) {
         lastIndex++;
       }
-      return String.valueOf(charArray, 0, lastIndex);
+      return new String(byteArray, 0, lastIndex, StandardCharsets.UTF_8);
     }
     return null;
   }

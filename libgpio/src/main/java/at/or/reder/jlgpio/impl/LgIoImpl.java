@@ -18,20 +18,42 @@ package at.or.reder.jlgpio.impl;
 import at.or.reder.jlgpio.LgChipId;
 import at.or.reder.jlgpio.LgIo;
 import at.or.reder.jlgpio.LgIoChip;
+import at.or.reder.jlgpio.spi.NativeSpi;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = LgIo.class)
 public class LgIoImpl implements LgIo {
 
+  private final NativeSpi nativeSpi;
+
+  public LgIoImpl()
+  {
+    this.nativeSpi = Lookup.getDefault().lookup(NativeSpi.class);
+  }
+
+  private String formatVersion(int version)
+  {
+    return MessageFormat.format("{0,number,0}.{1,number,0}.{2,number,0}",
+                                (version >> 16) & 0xff,
+                                (version >> 8) & 0xff,
+                                version & 0xff);
+  }
+
   @Override
   public Optional<String> getLgVersion()
   {
-    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    if (nativeSpi != null) {
+      return Optional.of(formatVersion(nativeSpi.lguVersion()));
+    } else {
+      return Optional.empty();
+    }
   }
 
   @Override
@@ -51,7 +73,7 @@ public class LgIoImpl implements LgIo {
   @Override
   public LgIoChip open(LgChipId chipId) throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    return LgIoChipImpl.build(nativeSpi, chipId);
   }
 
 }

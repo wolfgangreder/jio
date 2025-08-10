@@ -36,20 +36,25 @@ import org.openide.util.NbBundle.Messages;
   "Main_err_noCommand=Provide one of {0}",
   "Main_err_cannotFindService=Cannot find lg service instance.",
   "Main_enum_chips_descr=Enumerate available chips.",
-  "Main_enum_chips_showall=Show all items. Don't care if they are accessible."
+  "Main_enum_chips_showall=Show all items. Don't care if they are accessible.",
+  "Main_chip_info=Show chip info"
 })
 public class Main {
 
   private static final Options OPTIONS = new Options();
-  private static final Set<String> COMMANDS = Set.of("enum-chips");
+  private static final Set<String> COMMANDS = Set.of("enum-chips", "chip-info");
 
   static {
     OptionGroup group = new OptionGroup();
     group.setRequired(true);
     group.addOption(Option.builder().longOpt("enum-chips").hasArg(false).desc(Bundle.Main_enum_chips_descr()).get());
+    group.addOption(Option.builder().longOpt("chip-info").hasArg(true).desc(Bundle.Main_chip_info()).numberOfArgs(1).
+            optionalArg(true).
+            valueSeparator().get());
     OPTIONS.addOptionGroup(group);
     OPTIONS.addOption(Option.builder().longOpt("show-all").hasArg(false).required(false).desc(Bundle.
             Main_enum_chips_showall()).get());
+
   }
 
   private static String listCommands(String limiter)
@@ -66,6 +71,8 @@ public class Main {
     if (lg != null) {
       if (cmdLine.hasOption("enum-chips")) {
         success = EnumerateChips.run(cmdLine, lg);
+      } else if (cmdLine.hasOption("chip-info")) {
+        success = ShowChipInfo.showChipInfo(cmdLine, lg);
       }
     } else {
       System.err.println(Bundle.Main_err_cannotFindService());

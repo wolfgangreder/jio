@@ -26,15 +26,15 @@ public class TestNativeUtils {
   static Stream<Arguments> testNtsToString()
   {
     return Stream.of(Arguments.of(null, null),
-                     Arguments.of(new char[]{'W', 'o', 'l', 'f', 'i'}, "Wolfi"),
-                     Arguments.of(new char[]{'W', 'o', (char) 0, 'f', 'i'}, "Wo"),
-                     Arguments.of(new char[]{}, ""),
-                     Arguments.of(new char[]{0}, ""));
+                     Arguments.of(new byte[]{'W', 'o', 'l', 'f', 'i'}, "Wolfi"),
+                     Arguments.of(new byte[]{'W', 'o', (byte) 0, 'f', 'i'}, "Wo"),
+                     Arguments.of(new byte[]{}, ""),
+                     Arguments.of(new byte[]{0}, ""));
   }
 
   @ParameterizedTest
   @MethodSource
-  void testNtsToString(char[] array, String expected)
+  void testNtsToString(byte[] array, String expected)
   {
     assertThat(NativeUtils.ntsToString(array)).isEqualTo(expected);
   }

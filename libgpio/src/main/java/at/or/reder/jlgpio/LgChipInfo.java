@@ -1,5 +1,3 @@
-package at.or.reder.jlgpio;
-
 /*
  * Copyright 2025 Wolfgang Reder.
  *
@@ -15,8 +13,14 @@ package at.or.reder.jlgpio;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package at.or.reder.jlgpio;
 
+import lombok.Value;
 
-public record LgChipInfo(int numLines, String name, String label) {
+@Value
+public final class LgChipInfo {
 
+  private final int numLines;
+  private final String name;
+  private final String label;
 }
