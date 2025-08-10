@@ -15,6 +15,52 @@
  */
 package at.or.reder.jlgpio;
 
-public record LgChipId(long id) {
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import lombok.Value;
+import org.openide.util.NbBundle.Messages;
 
+@Value
+@Messages({
+  "# {0} - deviceName",
+  "LgChipId_err_not_parsable=Cannot parse device name \"{0}\""
+})
+public final class LgChipId {
+
+  private static final Pattern PAT_GPIO = Pattern.compile("/dev/gpiochip(\\d+)");
+  private final long deviceNum;
+
+  public static Matcher matchDeviceName(String deviceName)
+  {
+    return PAT_GPIO.matcher(deviceName);
+  }
+
+  public LgChipId(String deviceName) throws IllegalArgumentException
+  {
+    Matcher matcher = matchDeviceName(deviceName);
+    if (matcher.matches() && matcher.groupCount() > 0) {
+      deviceNum = Long.parseLong(matcher.group(1));
+    } else {
+      throw new IllegalArgumentException(Bundle.LgChipId_err_not_parsable(deviceName));
+    }
+  }
+
+  public String getDeviceName()
+  {
+    return "/dev/gpiochip" + Long.toString(deviceNum);
+  }
+
+  public boolean isAccesible()
+  {
+    Path path = Path.of(getDeviceName());
+    return Files.isReadable(path) && Files.isWritable(path);
+  }
+
+  @Override
+  public String toString()
+  {
+    return getDeviceName();
+  }
 }

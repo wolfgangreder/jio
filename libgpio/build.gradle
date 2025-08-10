@@ -19,12 +19,14 @@ repositories {
 dependencies {
     api libs.org.netbeans.api.org.openide.util
     api libs.org.netbeans.api.org.openide.util.lookup
+    implementation libs.lombok
   
     testImplementation libs.junit.jupiter
     testImplementation libs.junit.platform
     testImplementation libs.assertj.core
 
     annotationProcessor libs.org.netbeans.api.org.openide.util
+    annotationProcessor libs.lombok
 
 }
 

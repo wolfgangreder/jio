@@ -16,44 +16,71 @@
 package at.or.reder.jlgpio;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.help.HelpFormatter;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 
 @Messages({
   "# {0} - errorMessage",
   "Main_err_parseCmdLine=Cannot parse command line: {0}",
-  "Main_enum_chips_descr=Enumerate available chips"
+  "# {0} - commandList",
+  "Main_err_noCommand=Provide one of {0}",
+  "Main_err_cannotFindService=Cannot find lg service instance.",
+  "Main_enum_chips_descr=Enumerate available chips.",
+  "Main_enum_chips_showall=Show all items. Don't care if they are accessible."
 })
 public class Main {
 
   private static final Options OPTIONS = new Options();
+  private static final Set<String> COMMANDS = Set.of("enum-chips");
 
   static {
-    OPTIONS.addOption(Option.builder().longOpt("enum-chips").hasArg(false).desc(Bundle.Main_enum_chips_descr()).get());
+    OptionGroup group = new OptionGroup();
+    group.setRequired(true);
+    group.addOption(Option.builder().longOpt("enum-chips").hasArg(false).desc(Bundle.Main_enum_chips_descr()).get());
+    OPTIONS.addOptionGroup(group);
+    OPTIONS.addOption(Option.builder().longOpt("show-all").hasArg(false).required(false).desc(Bundle.
+            Main_enum_chips_showall()).get());
   }
 
-  public void showChipInfo()
+  private static String listCommands(String limiter)
   {
-    LgIo lg = Lookup.getDefault().lookup(LgIo.class);
+    return COMMANDS.stream()
+            .map(cmd -> "--" + cmd)
+            .collect(Collectors.joining(limiter, "[", "]"));
   }
 
   private void run(CommandLine cmdLine) throws IOException
   {
-    printHelp();
+    boolean success = false;
+    LgIo lg = Lookup.getDefault().lookup(LgIo.class);
+    if (lg != null) {
+      if (cmdLine.hasOption("enum-chips")) {
+        success = EnumerateChips.run(cmdLine, lg);
+      }
+    } else {
+      System.err.println(Bundle.Main_err_cannotFindService());
+    }
+    if (!success) {
+      printHelp();
+    }
   }
 
   private static void printHelp() throws IOException
   {
     HelpFormatter help = HelpFormatter.builder().setShowSince(false).get();
-    help.printHelp("jlgpio", "jlgpio command line tool 0.0.1-SNAPSHOT", OPTIONS, null, false);
+    help.printHelp("jlgpio " + listCommands("|"),
+                   "jlgpio command line tool 0.0.1-SNAPSHOT", OPTIONS,
+                   null, false);
   }
 
   public static void main(String[] args) throws IOException
@@ -64,7 +91,6 @@ public class Main {
       new Main().run(cmd);
     } catch (ParseException ex) {
       System.err.println(Bundle.Main_err_parseCmdLine(ex.getLocalizedMessage()));
-      Exceptions.printStackTrace(ex);
       printHelp();
     }
   }
