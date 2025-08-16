@@ -17,32 +17,57 @@ package at.or.reder.jio;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
+@Getter
 public enum LineFlag {
-  KERNEL(0x00000001),
-  OUTPUT(0x00000002),
-  ACTIVE_LOW(0x00000004),
-  OPEN_DRAIN(0x00000008),
-  OPEN_SOURCE(0x00000010),
-  PULL_UP(0x00000020),
-  PULL_DOWN(0x00000040),
-  PULL_NONE(0x00000080),
-  INPUT(0x00010000),
-  RISING_EDGE(0x00020000),
-  FALLING_EDGE(0x00040000),
-  REALTIME_CLOCK(0x00080000);
+  KERNEL(0x00000001, true, true, null),
+  OUTPUT(0x00000002, true, false, null),
+  ACTIVE_LOW(0x00000004, true, false, "al"),
+  OPEN_DRAIN(0x00000008, true, false, "od"),
+  OPEN_SOURCE(0x00000010, true, false, "os"),
+  PULL_UP(0x00000020, true, false, "pu"),
+  PULL_DOWN(0x00000040, true, false, "pd"),
+  PULL_NONE(0x00000080, true, false, "pn"),
+  INPUT(0x00010000, false, true, null),
+  RISING_EDGE(0x00020000, false, true, "ri"),
+  FALLING_EDGE(0x00040000, false, true, "fa"),
+  REALTIME_CLOCK(0x00080000, false, true, null);
 
   private final int magic;
+  private final boolean outputFlag;
+  private final boolean inputFlag;
+  private final String shortName;
 
-  private LineFlag(int magic)
+  public static String getLineFlags()
   {
-    this.magic = magic;
+    return Stream.of(values()).map(LineFlag::getShortName).filter(Objects::nonNull).collect(Collectors.joining(","));
   }
 
-  public int getMagic()
+  public static Set<LineFlag> fromShortNames(String shortNames)
   {
-    return magic;
+    String[] parts = shortNames.split(",");
+    return Stream.of(parts)
+            .map(LineFlag::fromShortName)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(LineFlag.class)));
+  }
+
+  public static LineFlag fromShortName(@NonNull String shortName)
+  {
+    for (LineFlag flag : values()) {
+      if (shortName.equals(flag.getShortName())) {
+        return flag;
+      }
+    }
+    return null;
   }
 
   public static Set<LineFlag> toSet(int lineInfoFlags)

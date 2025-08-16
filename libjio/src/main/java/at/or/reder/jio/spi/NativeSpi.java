@@ -17,7 +17,9 @@ package at.or.reder.jio.spi;
 
 import at.or.reder.jio.ChipInfo;
 import at.or.reder.jio.IoChipException;
+import at.or.reder.jio.LineFlag;
 import at.or.reder.jio.LineInfo;
+import java.util.Set;
 import org.openide.util.Lookup;
 
 public interface NativeSpi extends Lookup.Provider {
@@ -29,6 +31,18 @@ public interface NativeSpi extends Lookup.Provider {
   ChipInfo lgGpioGetChipInfo(int handle) throws IoChipException;
 
   LineInfo lgGpioGetLineInfo(int handle, int numLine) throws IoChipException;
+
+  Set<LineFlag> lgGpioGetMode(int handle, int numLine) throws IoChipException;
+
+  int lgGpioClaimOutput(int handle, Set<LineFlag> flags, int numLine, boolean level) throws IoChipException;
+
+  int lgGpioClaimInput(int handle, Set<LineFlag> flags, int numLine) throws IoChipException;
+
+  boolean lgGpioRead(int handle, int gpio) throws IoChipException;
+
+  void lgGpioWrite(int handle, int gpio, boolean level) throws IoChipException;
+
+  void lgGpioFree(int handle, int numLine) throws IoChipException;
 
   int lguVersion();
 

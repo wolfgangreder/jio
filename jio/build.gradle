@@ -46,7 +46,7 @@ java {
 application {
     // Define the main class for the application.
     mainClass = "${mainclass}"
-    applicationDefaultJvmArgs = ['-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:9009']
+    applicationDefaultJvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=${suspendDebug},address=0.0.0.0:9009"]
 }
 
 tasks.named('test') {

@@ -16,7 +16,9 @@
 package at.or.reder.jio;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.MissingResourceException;
+import java.util.stream.Collectors;
 import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 
@@ -24,12 +26,20 @@ import org.openide.util.NbBundle.Messages;
   "# {0} - methodName",
   "IoChipException_INVOKATION=Invokation error: {0}",
   "# {0} - errorCode",
-  "IoChipException_UKNOWN=unknown error {0,number,0}"
+  "IoChipException_UKNOWN=unknown error {0,number,0}",
+  "# {0} - flags",
+  "IoChipException_INVALID_FLAGS=Invalid line open flags ({0})."
 })
 @SuppressWarnings("serial")
 public class IoChipException extends IOException {
 
   private final int errorCode;
+
+  public IoChipException(Collection<LineFlag> flags)
+  {
+    super(Bundle.IoChipException_INVALID_FLAGS(flags.stream().map(LineFlag::name).collect(Collectors.joining(","))));
+    this.errorCode = 0;
+  }
 
   public IoChipException(String methodName, Throwable cause)
   {

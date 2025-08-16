@@ -29,6 +29,7 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.Structure;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 import lombok.NonNull;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -104,9 +105,60 @@ public class JniNativeImpl implements Library, NativeSpi {
     NativeLineInfo nativeInfo = new NativeLineInfo();
     checkLgResult(_lgGpioGetLineInfo(handle, numLine, nativeInfo));
     return new LineInfoImpl(nativeInfo.getOffset(),
-                              LineFlag.toSet(nativeInfo.getFlags()),
-                              nativeInfo.getName(),
-                              nativeInfo.getUser());
+                            LineFlag.toSet(nativeInfo.getFlags()),
+                            nativeInfo.getName(),
+                            nativeInfo.getUser());
+  }
+
+  public static native int _lgGpioGetMode(int handle, int numLine);
+
+  @Override
+  public Set<LineFlag> lgGpioGetMode(int handle, int numLine) throws IoChipException
+  {
+    int bitFlags = checkLgResult(_lgGpioGetMode(handle, numLine));
+    return LineFlag.toSet(bitFlags);
+  }
+
+  public static native int _lgGpioClaimOutput(int handle, int flags, int line, int level);
+
+  @Override
+  public int lgGpioClaimOutput(int handle, Set<LineFlag> flags, int numLine, boolean level) throws IoChipException
+  {
+    int bitFlags = flags.stream().filter(flag -> flag != LineFlag.OUTPUT).mapToInt(LineFlag::getMagic).sum();
+    return checkLgResult(_lgGpioClaimOutput(handle, bitFlags, numLine, level ? 1 : 0));
+  }
+
+  public static native int _lgGpioClaimInput(int handle, int flags, int line);
+
+  @Override
+  public int lgGpioClaimInput(int handle, Set<LineFlag> flags, int numLine) throws IoChipException
+  {
+    int bitFlags = flags.stream().filter(flag -> flag != LineFlag.INPUT).mapToInt(LineFlag::getMagic).sum();
+    return checkLgResult(_lgGpioClaimInput(handle, bitFlags, numLine));
+  }
+
+  public static native int _lgGpioRead(int handle, int gpio);
+
+  @Override
+  public boolean lgGpioRead(int handle, int gpio) throws IoChipException
+  {
+    return checkLgResult(_lgGpioRead(handle, gpio)) > 0;
+  }
+
+  public static native int _lgGpioWrite(int handle, int gpio, int level);
+
+  @Override
+  public void lgGpioWrite(int handle, int gpio, boolean level) throws IoChipException
+  {
+    checkLgResult(_lgGpioWrite(handle, gpio, level ? 1 : 0));
+  }
+
+  public static native int _lgGpioFree(int handle, int numLine);
+
+  @Override
+  public void lgGpioFree(int handle, int numLine) throws IoChipException
+  {
+    checkLgResult(_lgGpioFree(handle, numLine));
   }
 
   private static native int _lguVersion();

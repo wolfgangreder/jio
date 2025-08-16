@@ -15,10 +15,6 @@
  */
 package at.or.reder.jio;
 
-import java.io.IOException;
-
-public interface OutputLine extends IoLine {
-
-  void set(boolean level) throws IOException;
+public interface InputLine extends IoLine {
 
 }

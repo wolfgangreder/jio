@@ -15,10 +15,27 @@
  */
 package at.or.reder.jio;
 
-/**
- *
- * @author wolfi
- */
-public interface IoLine {
-  
+import java.io.IOException;
+import java.util.Set;
+
+public interface IoLine extends AutoCloseable {
+
+  IoChip getChip();
+
+  int getLineNum();
+
+  LineInfo getLineInfo() throws IOException;
+
+  default Set<LineFlag> getFlags() throws IOException
+  {
+    return getLineInfo().getFlags();
+  }
+
+  void setFlags() throws IOException;
+
+  boolean get() throws IOException;
+
+  @Override
+  void close() throws IOException;
+
 }

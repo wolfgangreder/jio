@@ -17,7 +17,10 @@ package at.or.reder.jio;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.cli.CommandLine;
 
 public class ShowLineInfo {
@@ -31,11 +34,34 @@ public class ShowLineInfo {
     System.out.println(MessageFormat.format("\tUser: {0}", lineInfo.getUser()));
   }
 
+  private static Integer stringToInt(String str)
+  {
+    if (str != null) {
+      try {
+        return Integer.valueOf(str);
+      } catch (NumberFormatException ex) {
+        //
+      }
+    }
+    return null;
+  }
+
+  private static List<ChipId> getChipIdList(CommandLine cmdLine)
+  {
+    String[] arguments = cmdLine.getOptionValue("line-info").split(",");
+    return Stream.of(arguments)
+            .map(ShowLineInfo::stringToInt)
+            .filter(Objects::nonNull)
+            .map(ChipId::new)
+            .toList();
+  }
+
   public static final boolean showLineInfo(CommandLine cmdLine, Io lgIo) throws IOException
   {
-    try (IoChip chip = lgIo.open(new ChipId(0))) {
-      chip.enumerateLines()
-              .forEach(ShowLineInfo::printLineInfo);
+    for (ChipId chipId : getChipIdList(cmdLine)) {
+      try (IoChip chip = lgIo.open(chipId)) {
+        chip.enumerateLines().forEach(ShowLineInfo::printLineInfo);
+      }
     }
     return true;
   }

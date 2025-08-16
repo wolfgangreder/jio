@@ -17,11 +17,17 @@ package at.or.reder.jio.impl;
 
 import at.or.reder.jio.ChipId;
 import at.or.reder.jio.ChipInfo;
+import at.or.reder.jio.InputLine;
 import at.or.reder.jio.IoChip;
+import at.or.reder.jio.IoLine;
+import at.or.reder.jio.LineFlag;
 import at.or.reder.jio.LineInfo;
 import at.or.reder.jio.OutputLine;
 import at.or.reder.jio.spi.NativeSpi;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,10 +37,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class IoChipImpl implements IoChip {
 
+  @NonNull
+  @Getter(AccessLevel.PACKAGE)
   private final NativeSpi nativeSpi;
+  @Getter(AccessLevel.PACKAGE)
   private final int handle;
   @Getter
   private final ChipId id;
+  private final List<IoLine> openLines = new ArrayList<>();
 
   static IoChipImpl build(@NonNull NativeSpi nativeSpi, @NonNull ChipId chipId) throws IOException
   {
@@ -51,7 +61,7 @@ final class IoChipImpl implements IoChip {
   @Override
   public LineInfo getLineInfo(int numLine) throws IOException
   {
-    return enumerateLines().filter(line -> line.getLine() == numLine).findFirst().orElse(null);
+    return nativeSpi.lgGpioGetLineInfo(handle, numLine);
   }
 
   @Override
@@ -70,16 +80,50 @@ final class IoChipImpl implements IoChip {
     }
   }
 
-  @Override
-  public OutputLine openLine(int numLine) throws IOException
+  private Set<LineFlag> fixLineFlags(int numLine, Set<LineFlag> flagsIn) throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    if (flagsIn.isEmpty()) {
+      return getLineInfo(numLine).getFlags();
+    }
+    return flagsIn;
+  }
+
+  @Override
+  public OutputLine openOutputLine(int numLine, Set<LineFlag> flags, boolean initState) throws IOException
+  {
+    Set<LineFlag> realFlags = fixLineFlags(numLine, flags);
+    OutputLine result = new OutputLineImpl(this, numLine, realFlags);
+    openLines.add(result);
+    return result;
+  }
+
+  @Override
+  public InputLine openInputLine(int numLine, Set<LineFlag> flags) throws IOException
+  {
+    Set<LineFlag> realFlags = fixLineFlags(numLine, flags);
+    InputLine result = new InputLineImpl(this, numLine, realFlags);
+    openLines.add(result);
+    return result;
+  }
+
+  void removeLine(@NonNull IoLine line)
+  {
+    openLines.remove(line);
   }
 
   @Override
   public void close() throws IOException
   {
-    nativeSpi.lgGpiochipClose(handle);
+    try {
+      openLines.forEach(ThrowableWrapper.wrapConsumer(IoLine::close));
+    } catch (WrappedError error) {
+      if (error.getCause() instanceof IOException iOException) {
+        throw iOException;
+      } else {
+        throw new IOException(error);
+      }
+    } finally {
+      nativeSpi.lgGpiochipClose(handle);
+    }
   }
-
 }

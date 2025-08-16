@@ -37,7 +37,12 @@ import org.openide.util.NbBundle.Messages;
   "Main_err_cannotFindService=Cannot find lg service instance.",
   "Main_enum_chips_descr=Enumerate available chips.",
   "Main_enum_chips_showall=Show all items. Don't care if they are accessible.",
-  "Main_chip_info=Show chip info"
+  "Main_chip_info=Show chip info",
+  "Main_line_info=Show line info",
+  "Main_line_state=Set line state. Argument is <lineNumber>=<state>",
+  "# {0} - flagList",
+  "Main_flags=Line open flags. Argument is list of [{0}]",
+  "Main_chip=Chip id"
 })
 public class Main {
 
@@ -51,11 +56,18 @@ public class Main {
     group.addOption(Option.builder().longOpt("chip-info").hasArg(true).desc(Bundle.Main_chip_info()).numberOfArgs(1).
             optionalArg(true).
             valueSeparator().get());
-    group.addOption(Option.builder().longOpt("line-info").hasArg(true).desc("").numberOfArgs(2).valueSeparator(',').
+    group.addOption(Option.builder().longOpt("line-info").hasArg(true).desc(Bundle.Main_line_info()).valueSeparator(',').
+            optionalArg(false).get());
+    group.addOption(Option.builder().longOpt("line-state").option("s").hasArg(true).desc(Bundle.Main_line_info()).
+            valueSeparator('=').
             optionalArg(false).get());
     OPTIONS.addOptionGroup(group);
     OPTIONS.addOption(Option.builder().longOpt("show-all").hasArg(false).required(false).desc(Bundle.
             Main_enum_chips_showall()).get());
+    OPTIONS.addOption(Option.builder().longOpt("flags").option("f").hasArg(true).valueSeparator(',').optionalArg(false)
+            .desc(Bundle.Main_flags(LineFlag.getLineFlags())).get());
+    OPTIONS.addOption(Option.builder().longOpt("chip").option("c").hasArg(true).numberOfArgs(1).optionalArg(false)
+            .desc(Bundle.Main_chip()).get());
   }
 
   private static String listCommands(String limiter)
@@ -65,7 +77,7 @@ public class Main {
             .collect(Collectors.joining(limiter, "[", "]"));
   }
 
-  private void run(CommandLine cmdLine) throws IOException
+  private void run(CommandLine cmdLine) throws IOException, ParseException
   {
     boolean success = false;
     Io lg = Lookup.getDefault().lookup(Io.class);
@@ -76,6 +88,8 @@ public class Main {
         success = ShowChipInfo.showChipInfo(cmdLine, lg);
       } else if (cmdLine.hasOption("line-info")) {
         success = ShowLineInfo.showLineInfo(cmdLine, lg);
+      } else if (cmdLine.hasOption("line-state")) {
+        success = LineState.setLineState(cmdLine, lg);
       }
     } else {
       System.err.println(Bundle.Main_err_cannotFindService());

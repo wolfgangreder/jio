@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.jio;
+package at.or.reder.jio.impl;
 
+import at.or.reder.jio.InputLine;
+import at.or.reder.jio.LineFlag;
 import java.io.IOException;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.Collection;
 
-public interface IoChip extends AutoCloseable {
+class InputLineImpl extends AbstractIoLine implements InputLine {
 
-  ChipId getId();
-
-  ChipInfo getChipInfo() throws IOException;
-
-  LineInfo getLineInfo(int numLine) throws IOException;
-
-  Stream<LineInfo> enumerateLines() throws IOException;
-
-  OutputLine openOutputLine(int numLine, Set<LineFlag> flags, boolean initState) throws IOException;
-
-  InputLine openInputLine(int numLine, Set<LineFlag> flags) throws IOException;
+  public InputLineImpl(IoChipImpl chip, int lineNum, Collection<LineFlag> flags)
+  {
+    super(chip, lineNum, toUnmodifiableSet(flags));
+  }
 
   @Override
-  void close() throws IOException;
+  public void setFlags() throws IOException
+  {
+    setLineHandle(getChip().getNativeSpi().lgGpioClaimInput(getChip().getHandle(), getFlags(), getLineNum()));
+  }
+
+  @Override
+  public boolean get() throws IOException
+  {
+    return getChip().getNativeSpi().lgGpioRead(getChip().getHandle(), getLineNum());
+  }
 
 }

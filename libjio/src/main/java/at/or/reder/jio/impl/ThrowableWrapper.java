@@ -18,6 +18,7 @@ package at.or.reder.jio.impl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import lombok.NonNull;
@@ -38,6 +39,12 @@ public class ThrowableWrapper {
   public interface ThrowingRunnable {
 
     void run() throws Exception;
+  }
+
+  @FunctionalInterface
+  public interface ThrowingConsumer<I> {
+
+    void accept(I item) throws Exception;
   }
 
   private static Error createThrowError(Throwable th, Class<? extends Error> errorClass)
@@ -71,12 +78,12 @@ public class ThrowableWrapper {
     };
   }
 
-  public Runnable wrapRunnable(@NonNull Runnable toWrap)
+  public Runnable wrapRunnable(@NonNull ThrowingRunnable toWrap)
   {
     return wrapRunnable(toWrap, null);
   }
 
-  public Runnable wrapRunnable(@NonNull Runnable toWrap, Class<? extends Error> errorToThrow)
+  public Runnable wrapRunnable(@NonNull ThrowingRunnable toWrap, Class<? extends Error> errorToThrow)
   {
     return () -> {
       try {
@@ -86,4 +93,21 @@ public class ThrowableWrapper {
       }
     };
   }
+
+  public <I> Consumer<I> wrapConsumer(@NonNull ThrowingConsumer<I> toWrap)
+  {
+    return wrapConsumer(toWrap, null);
+  }
+
+  public <I> Consumer<I> wrapConsumer(@NonNull ThrowingConsumer<I> toWrap, Class<? extends Error> errorToThrow)
+  {
+    return (item) -> {
+      try {
+        toWrap.accept(item);
+      } catch (Exception ex) {
+        throw createThrowError(ex, errorToThrow);
+      }
+    };
+  }
+  
 }
